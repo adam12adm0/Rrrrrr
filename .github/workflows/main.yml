@@ -1,0 +1,29 @@
+name: CI
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    # تفعيل Remote Desktop Services
+    - name: Enable TS
+      run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
+
+    - run: Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+
+    - run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+
+    # إعداد بيانات المستخدم
+    - run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
+
+    # إنشاء النفق باستخدام Serveo
+    - name: Create Tunnel with Serveo
+      run: |
+        # تنزيل أداة SSH لـ Windows (plink من PuTTY)
+        Invoke-WebRequest -Uri "https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe" -OutFile "plink.exe"
+        # تشغيل النفق باستخدام Serveo
+        Start-Process -FilePath "plink.exe" -ArgumentList "-N -T -R 3389:localhost:3389 serveo.net" -NoNewWindow
+        # إبقاء سير العمل نشطًا لمدة 30 دقيقة
+        Start-Sleep -Seconds 1800
