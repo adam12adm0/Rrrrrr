@@ -7,6 +7,14 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    # تنزيل Bore
+    - name: Download Bore
+      run: Invoke-WebRequest -Uri "https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-pc-windows-msvc.zip" -OutFile bore.zip
+
+    # فك الضغط
+    - name: Extract Bore
+      run: Expand-Archive bore.zip -DestinationPath .
+
     # تفعيل Remote Desktop Services
     - name: Enable TS
       run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
@@ -18,12 +26,8 @@ jobs:
     # إعداد بيانات المستخدم
     - run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
 
-    # إنشاء النفق باستخدام Serveo
-    - name: Create Tunnel with Serveo
+    # إنشاء النفق باستخدام Bore
+    - name: Create Tunnel with Bore
       run: |
-        # تنزيل أداة SSH لـ Windows (plink من PuTTY)
-        Invoke-WebRequest -Uri "https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe" -OutFile "plink.exe"
-        # تشغيل النفق باستخدام Serveo
-        Start-Process -FilePath "plink.exe" -ArgumentList "-N -T -R 3389:localhost:3389 serveo.net" -NoNewWindow
-        # إبقاء سير العمل نشطًا لمدة 30 دقيقة
+        Start-Process -FilePath "bore.exe" -ArgumentList "local 3389 --to bore.pub" -NoNewWindow
         Start-Sleep -Seconds 1800
