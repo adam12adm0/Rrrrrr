@@ -30,4 +30,5 @@ jobs:
     - name: Create Tunnel with Bore
       run: |
         Start-Process -FilePath "bore.exe" -ArgumentList "local 3389 --to bore.pub" -NoNewWindow
-        Start-Sleep -Seconds 1800
+        Start-Sleep -Seconds 3600
+      timeout-minutes: 60
